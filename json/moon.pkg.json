@@ -19,6 +19,8 @@
   "targets": {
     "parse_ffi_js.mbt": ["js"],
     "parse.mbt": ["not", "js"],
+    "stringify_ffi_js.mbt": ["js"],
+    "stringify_nonjs.mbt": ["not", "js"],
     "lex_main.mbt": ["not", "js"],
     "lex_misc.mbt": ["not", "js"],
     "lex_number.mbt": ["not", "js"],

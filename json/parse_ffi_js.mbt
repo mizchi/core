@@ -140,3 +140,60 @@ pub fn parse(
     )
   }
 }
+
+// ============================================================================
+// Stringify FFI Implementation
+// ============================================================================
+
+///|
+extern "js" fn js_json_stringify(json : Json, indent : Int) -> String =
+  #| (json, indent) => {
+  #|   const convert = (v) => {
+  #|     switch (v.$tag) {
+  #|       case 0: return null;
+  #|       case 1: return true;
+  #|       case 2: return false;
+  #|       case 3: return v._0;
+  #|       case 4: return v._0;
+  #|       case 5: return v._0.map(convert);
+  #|       case 6: {
+  #|         const obj = {};
+  #|         let entry = v._0.head;
+  #|         while (entry) {
+  #|           obj[entry.key] = convert(entry.value);
+  #|           entry = entry.next;
+  #|         }
+  #|         return obj;
+  #|       }
+  #|       default: return null;
+  #|     }
+  #|   };
+  #|   return JSON.stringify(convert(json), null, indent || undefined);
+  #| }
+
+///|
+extern "js" fn js_json_stringify_escape_slash(json : Json, indent : Int) -> String =
+  #| (json, indent) => {
+  #|   const convert = (v) => {
+  #|     switch (v.$tag) {
+  #|       case 0: return null;
+  #|       case 1: return true;
+  #|       case 2: return false;
+  #|       case 3: return v._0;
+  #|       case 4: return v._0;
+  #|       case 5: return v._0.map(convert);
+  #|       case 6: {
+  #|         const obj = {};
+  #|         let entry = v._0.head;
+  #|         while (entry) {
+  #|           obj[entry.key] = convert(entry.value);
+  #|           entry = entry.next;
+  #|         }
+  #|         return obj;
+  #|       }
+  #|       default: return null;
+  #|     }
+  #|   };
+  #|   const result = JSON.stringify(convert(json), null, indent || undefined);
+  #|   return result.replace(/\//g, '\\/');
+  #| }
