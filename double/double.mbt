@@ -158,35 +158,9 @@ pub impl Hash for Double with hash_combine(self, hasher) {
   hasher.combine_double(self)
 }
 
-///|
-/// Converts a double-precision floating-point number to its string
-/// representation.
-///
-/// Parameters:
-///
-/// * `self`: The double-precision floating-point number to be converted.
-///
-/// Returns a string representation of the double-precision floating-point
-/// number.
-///
-/// Example:
-///
-/// ```mbt test
-/// inspect(42.0.to_string(), content="42")
-/// inspect(3.14159.to_string(), content="3.14159")
-/// inspect((-0.0).to_string(), content="0")
-/// inspect(@double.not_a_number.to_string(), content="NaN")
-/// ```
-///
-pub fn Double::to_string(self : Double) -> String {
-  @ryu.ryu_to_string(self)
-}
-
-// TODO:
-// #intrinsic("%f64.to_string")
-// impl Show for Double with to_string(self) -> String{
-//   @ryu.ryu_to_string(self)
-// }
+// Double::to_string is defined in:
+// - to_string_js.mbt (JS backend - uses native JS)
+// - to_string_nonjs.mbt (Wasm/Native backend - uses Ryu algorithm)
 
 ///|
 pub impl Show for Double with output(self, logger) {

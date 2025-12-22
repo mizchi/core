@@ -30,6 +30,8 @@
     "cbrt_nonjs.mbt" : ["not", "js"],
     "hypot_js.mbt" : ["js"],
     "hypot_nonjs.mbt" : ["not", "js"],
-    "scalbn.mbt" : ["not", "js"]
+    "scalbn.mbt" : ["not", "js"],
+    "to_string_js.mbt": ["js"],
+    "to_string_nonjs.mbt": ["not", "js"]
   }
 }
