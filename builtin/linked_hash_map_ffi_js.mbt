@@ -66,13 +66,13 @@ fn[K, V] Map::append_entry(self : Map[K, V], entry : Entry[K, V]) -> Unit {
 ///|
 /// Create a hash map.
 pub fn[K, V] Map::new(capacity? : Int = 8) -> Map[K, V] {
-  ignore(capacity)
+  let cap = capacity.next_power_of_two()
   {
     size: 0,
-    capacity: 8,
-    capacity_mask: 7,
-    grow_at: 6,
-    entries: FixedArray::make(8, None),
+    capacity: cap,
+    capacity_mask: cap - 1,
+    grow_at: cap * 13 / 16,
+    entries: FixedArray::make(cap, None),
     head: None,
     tail: -1,
   }
@@ -81,7 +81,12 @@ pub fn[K, V] Map::new(capacity? : Int = 8) -> Map[K, V] {
 ///|
 /// Create a hash map from array.
 pub fn[K : Hash + Eq, V] Map::from_array(arr : ArrayView[(K, V)]) -> Map[K, V] {
-  let m = Map::new()
+  let length = arr.length()
+  let mut cap = length.next_power_of_two()
+  if length > cap * 13 / 16 {
+    cap *= 2
+  }
+  let m = Map::new(capacity=cap)
   for e in arr {
     m.set(e.0, e.1)
   }
@@ -348,8 +353,13 @@ pub impl[K : Hash + Eq, V : Eq] Eq for Map[K, V] with equal(
 
 ///|
 pub fn[K : Hash + Eq, V] Map::of(arr : FixedArray[(K, V)]) -> Map[K, V] {
-  let m = Map::new()
-  for i in 0..<arr.length() {
+  let length = arr.length()
+  let mut cap = length.next_power_of_two()
+  if length > cap * 13 / 16 {
+    cap *= 2
+  }
+  let m = Map::new(capacity=cap)
+  for i in 0..<length {
     let e = arr[i]
     m.set(e.0, e.1)
   }
