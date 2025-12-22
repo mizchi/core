@@ -36,6 +36,10 @@
     "double_to_int64_native.mbt": ["native", "llvm"],
     "double_to_int64_wasm.mbt": ["wasm", "wasm-gc"],
     "double_to_int.mbt": ["not", "wasm", "wasm-gc"],
-    "double_to_int_wasm.mbt": ["wasm", "wasm-gc"]
+    "double_to_int_wasm.mbt": ["wasm", "wasm-gc"],
+    "linked_hash_map_ffi_js.mbt": ["js"],
+    "linked_hash_map.mbt": ["not", "js"],
+    "linked_hash_map_test.mbt": ["not", "js"],
+    "linked_hash_map_wbtest.mbt": ["not", "js"]
   }
 }
