@@ -153,7 +153,7 @@ extern "js" fn js_json_stringify(json : Json, indent : Int) -> String =
   #|       case 0: return null;
   #|       case 1: return true;
   #|       case 2: return false;
-  #|       case 3: return v._0;
+  #|       case 3: return v._1 !== undefined ? '__REPR__:' + v._1 : v._0;
   #|       case 4: return v._0;
   #|       case 5: return v._0.map(convert);
   #|       case 6: {
@@ -168,7 +168,8 @@ extern "js" fn js_json_stringify(json : Json, indent : Int) -> String =
   #|       default: return null;
   #|     }
   #|   };
-  #|   return JSON.stringify(convert(json), null, indent || undefined);
+  #|   let result = JSON.stringify(convert(json), null, indent || undefined);
+  #|   return result.replace(/"__REPR__:([^"]+)"/g, '$1');
   #| }
 
 ///|
@@ -179,7 +180,7 @@ extern "js" fn js_json_stringify_escape_slash(json : Json, indent : Int) -> Stri
   #|       case 0: return null;
   #|       case 1: return true;
   #|       case 2: return false;
-  #|       case 3: return v._0;
+  #|       case 3: return v._1 !== undefined ? '__REPR__:' + v._1 : v._0;
   #|       case 4: return v._0;
   #|       case 5: return v._0.map(convert);
   #|       case 6: {
@@ -194,6 +195,7 @@ extern "js" fn js_json_stringify_escape_slash(json : Json, indent : Int) -> Stri
   #|       default: return null;
   #|     }
   #|   };
-  #|   const result = JSON.stringify(convert(json), null, indent || undefined);
+  #|   let result = JSON.stringify(convert(json), null, indent || undefined);
+  #|   result = result.replace(/"__REPR__:([^"]+)"/g, '$1');
   #|   return result.replace(/\//g, '\\/');
   #| }
