@@ -1,0 +1,16 @@
+{
+  "import": [
+    "moonbitlang/core/builtin",
+    "moonbitlang/core/bench",
+    "moonbitlang/core/hashmap",
+    "moonbitlang/core/sorted_map",
+    "moonbitlang/core/double",
+    "moonbitlang/core/json",
+    "moonbitlang/core/string",
+    "moonbitlang/core/array",
+    "moonbitlang/core/bigint",
+    "moonbitlang/core/strconv",
+    { "path": "moonbitlang/core/immut/hashmap", "alias": "immut_hashmap" },
+    { "path": "moonbitlang/core/immut/sorted_map", "alias": "immut_sorted_map" }
+  ]
+}
