@@ -20,10 +20,10 @@
 
 ///|
 priv struct Entry[K, V] {
-  mut prev : Int
+  prev : Int
   mut next : Entry[K, V]?
-  mut psl : Int  // Not used in JS FFI, kept for struct compatibility
-  hash : Int     // Not used in JS FFI, kept for struct compatibility
+  psl : Int  // Not used in JS FFI, kept for struct compatibility
+  hash : Int // Not used in JS FFI, kept for struct compatibility
   key : K
   mut value : V
 } derive(Show)
@@ -40,34 +40,28 @@ struct Map[K, V] {
   mut tail : Int
 }
 
-// JS FFI for internal JS Map operations
-priv type JSMap
-
-///|
-extern "js" fn js_map_new() -> JSMap =
-  #| () => new Map()
-
-///|
-extern "js" fn js_map_set(m : JSMap, key : String, value : Entry[String, Json]) -> Unit =
-  #| (m, k, v) => m.set(k, v)
-
-///|
-extern "js" fn js_map_get(m : JSMap, key : String) -> Entry[String, Json]? =
-  #| (m, k) => m.get(k)
-
-///|
-extern "js" fn js_map_has(m : JSMap, key : String) -> Bool =
-  #| (m, k) => m.has(k)
-
-///|
-extern "js" fn js_map_delete(m : JSMap, key : String) -> Bool =
-  #| (m, k) => m.delete(k)
-
-///|
-extern "js" fn js_map_size(m : JSMap) -> Int =
-  #| (m) => m.size
-
 // Implementations
+
+///|
+/// Internal helper to append entry to linked list
+fn[K, V] Map::append_entry(self : Map[K, V], entry : Entry[K, V]) -> Unit {
+  match self.head {
+    None => self.head = Some(entry)
+    Some(_) => {
+      let mut last = self.head
+      while last is Some(e) {
+        match e.next {
+          None => {
+            e.next = Some(entry)
+            break
+          }
+          Some(_) => last = e.next
+        }
+      }
+    }
+  }
+  self.size += 1
+}
 
 ///|
 /// Create a hash map.
@@ -107,32 +101,7 @@ pub fn[K : Hash + Eq, V] Map::set(self : Map[K, V], key : K, value : V) -> Unit 
     curr = entry.next
   }
   // Not found, add new entry
-  let entry : Entry[K, V] = {
-    prev: self.tail,
-    next: None,
-    psl: 0,
-    hash: 0,
-    key,
-    value,
-  }
-  match self.head {
-    None => self.head = Some(entry)
-    Some(_) => {
-      // Find the last entry
-      let mut last = self.head
-      while last is Some(e) {
-        match e.next {
-          None => {
-            e.next = Some(entry)
-            entry.prev = 0 // We don't track proper indices in JS FFI version
-            break
-          }
-          Some(_) => last = e.next
-        }
-      }
-    }
-  }
-  self.size += 1
+  self.append_entry({ prev: -1, next: None, psl: 0, hash: 0, key, value })
 }
 
 ///|
@@ -417,32 +386,7 @@ pub fn[K, V, V2] Map::map(self : Map[K, V], f : (K, V) -> V2) -> Map[K, V2] {
   let other : Map[K, V2] = Map::new()
   loop self.head {
     Some({ key, value, next, .. }) => {
-      let new_value = f(key, value)
-      // Add to other's linked list
-      let entry : Entry[K, V2] = {
-        prev: -1,
-        next: None,
-        psl: 0,
-        hash: 0,
-        key,
-        value: new_value,
-      }
-      match other.head {
-        None => other.head = Some(entry)
-        Some(_) => {
-          let mut last = other.head
-          while last is Some(e) {
-            match e.next {
-              None => {
-                e.next = Some(entry)
-                break
-              }
-              Some(_) => last = e.next
-            }
-          }
-        }
-      }
-      other.size += 1
+      other.append_entry({ prev: -1, next: None, psl: 0, hash: 0, key, value: f(key, value) })
       continue next
     }
     None => break
@@ -481,30 +425,7 @@ pub fn[K : Eq, V] Map::merge_in_place(
         curr = entry.next
       }
       if !found {
-        let entry : Entry[K, V] = {
-          prev: -1,
-          next: None,
-          psl: 0,
-          hash: 0,
-          key,
-          value,
-        }
-        match self.head {
-          None => self.head = Some(entry)
-          Some(_) => {
-            let mut last = self.head
-            while last is Some(e) {
-              match e.next {
-                None => {
-                  e.next = Some(entry)
-                  break
-                }
-                Some(_) => last = e.next
-              }
-            }
-          }
-        }
-        self.size += 1
+        self.append_entry({ prev: -1, next: None, psl: 0, hash: 0, key, value })
       }
       continue next
     }
@@ -567,16 +488,6 @@ pub fn[K : Hash + Eq, V] Map::update(
 }
 
 // View accessors - simplified versions
-
-///|
-fn StringView::equal_to_string(self : Self, other : String) -> Bool {
-  self.to_string() == other
-}
-
-///|
-fn BytesView::equal_to_bytes(self : Self, other : Bytes) -> Bool {
-  self.to_bytes() == other
-}
 
 ///|
 pub fn[V] Map::get_from_bytes(map : Self[Bytes, V], key : BytesView) -> V? {
