@@ -1,0 +1,12 @@
+{
+  "is-main": true,
+  "import": [
+    "moonbitlang/core/builtin",
+    "moonbitlang/core/string"
+  ],
+  "targets": {
+    "main.mbt": ["js"],
+    "json_parse.mbt": ["js"],
+    "json_test.mbt": ["js"]
+  }
+}
