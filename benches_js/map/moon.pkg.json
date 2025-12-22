@@ -1,0 +1,11 @@
+{
+  "is-main": true,
+  "import": [
+    "moonbitlang/core/builtin",
+    "moonbitlang/core/double",
+    { "path": "moonbitlang/core/hashmap", "alias": "hm" }
+  ],
+  "targets": {
+    "main.mbt": ["js"]
+  }
+}
