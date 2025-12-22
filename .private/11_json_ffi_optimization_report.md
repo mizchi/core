@@ -186,6 +186,60 @@ extern "js" fn js_json_stringify_impl(json : Json) -> String
 | Implementation | Simple | Medium | Simple |
 | Recommendation | **Adopt** | **Adopt** | Careful consideration |
 
+## Combined Bundle Size Analysis (Regex + JSON)
+
+### Bundle Size Comparison
+
+| Package | Size | Notes |
+|---------|------|-------|
+| `regex_ffi` (standalone) | **10.6 KB** | Minimal FFI-only implementation |
+| `string/regex` (JS FFI integrated) | **61 KB** | With String ops, error handling |
+| `json` | **259 KB** | Full JSON implementation |
+| `regex + json` (combined) | **305 KB** | 15KB smaller than sum (320KB) |
+
+### Benchmark Results (regex_json)
+
+```
+regex_parse_log:      9.66 us/op   (1000 iterations)
+json_stringify:      15.77 us/op   (1000 iterations)
+json_parse:          15.27 us/op   (1000 iterations)
+regex_json_combined:  5.02 us/op   (500 iterations)
+batch_process_logs:  27.95 us/op   (200 iterations)
+```
+
+### Key Findings
+
+1. **Treeshaking works correctly**: VM/parser code is excluded from JS bundle
+2. **Shared code optimization**: Combined bundle is 15KB smaller than individual sum
+3. **JS FFI integration complete**: `string/regex` now uses native JS RegExp on JS target
+4. **43 tests pass** on JS target, 124 tests pass on Wasm target
+
+### File Structure (string/regex/internal/regexp)
+
+```
+top_ffi_js.mbt       # JS FFI implementation (JS target only)
+top_nonjs.mbt        # MoonBit VM implementation (non-JS targets)
+alias_js.mbt         # JS target aliases
+alias_nonjs.mbt      # Non-JS target aliases
+regex_test_js.mbt    # 43 JS-compatible tests (both targets)
+regex_test.mbt       # 81 MoonBit-specific tests (non-JS only)
+```
+
+### moon.pkg.json targets configuration
+
+```json
+{
+  "targets": {
+    "top_ffi_js.mbt": ["js"],
+    "top_nonjs.mbt": ["not", "js"],
+    "alias_js.mbt": ["js"],
+    "alias_nonjs.mbt": ["not", "js"],
+    "regex_test.mbt": ["not", "js"],
+    "regex_test_js.mbt": []  // runs on both
+  }
+}
+```
+
 ## Conclusion
 
 JS FFI JSON parser achieves **90% bundle size reduction**. Performance varies by operation but is generally equal or better.
@@ -205,3 +259,30 @@ Adoption considerations:
 1. **Opt-in approach**: Default to MoonBit pure implementation, allow JS FFI selection via `moon.pkg.json`
 2. **Documentation**: Clearly document limitations (no error details, repr loss)
 3. **Gradual adoption**: Start with parse FFI, consider stringify later
+
+## Update Log
+
+### 2024-12-22: JSON FFI Integration into Main Package
+
+- Integrated JS FFI JSON parse into `json/parse_ffi_js.mbt`
+- Configured `moon.pkg.json` targets to exclude lexer/parser on JS target
+- Non-JS files: `parse.mbt`, `lex_*.mbt`, `internal_types.mbt`, `utils.mbt`
+- JS-only files: `parse_ffi_js.mbt`
+
+**Bundle Size Results (regex + json combined):**
+| Metric | Before | After | Reduction |
+|--------|--------|-------|-----------|
+| Raw | 305 KB | **103 KB** | **66%** |
+| Gzip | - | **14.5 KB** | - |
+
+**Test Results:**
+- Wasm target: 32/32 parse tests pass
+- JS target: Benchmark runs correctly
+
+### 2024-12-22: Regex + JSON Integration
+
+- Integrated JS FFI regex implementation into `string/regex/internal/regexp`
+- Added 43 JS-compatible tests (`regex_test_js.mbt`)
+- Created `benches_js/regex_json` for combined bundle size measurement
+- Verified treeshaking correctly excludes VM/parser code from JS bundle
+- Combined regex+json bundle achieves 15KB code sharing optimization

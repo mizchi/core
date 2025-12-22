@@ -13,5 +13,16 @@
   "wbtest-import": [
     "moonbitlang/core/json",
     "moonbitlang/core/result"
-  ]
+  ],
+  "targets": {
+    "top_ffi_js.mbt": ["js"],
+    "top_nonjs.mbt": ["not", "js"],
+    "alias_js.mbt": ["js"],
+    "alias_nonjs.mbt": ["not", "js"],
+    "alias_wbtest.mbt": ["not", "js"],
+    "parser_wbtest.mbt": ["not", "js"],
+    "todo.mbt": ["not", "js"],
+    "regex_test.mbt": ["not", "js"],
+    "todo_test.mbt": ["not", "js"]
+  }
 }

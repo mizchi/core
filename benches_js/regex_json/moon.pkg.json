@@ -1,0 +1,12 @@
+{
+  "is-main": true,
+  "import": [
+    "moonbitlang/core/builtin",
+    "moonbitlang/core/option",
+    { "path": "moonbitlang/core/string/regex", "alias": "re" },
+    { "path": "moonbitlang/core/json", "alias": "json" }
+  ],
+  "targets": {
+    "main.mbt": ["js"]
+  }
+}

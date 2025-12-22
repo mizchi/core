@@ -117,6 +117,12 @@ pub suberror RegexpError {
 } derive(Show)
 
 ///|
+/// Factory function to create RegexpError for JS FFI implementation
+pub fn create_regexp_error(message : String) -> RegexpError {
+  RegexpError(err=InternalError, source_fragment=message.view())
+}
+
+///|
 /// Create a regular expression parser
 ///
 /// Parameters:

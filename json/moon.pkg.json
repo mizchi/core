@@ -15,5 +15,19 @@
     "moonbitlang/core/unit",
     "moonbitlang/core/bigint",
     "moonbitlang/core/bytes"
-  ]
+  ],
+  "targets": {
+    "parse_ffi_js.mbt": ["js"],
+    "parse.mbt": ["not", "js"],
+    "lex_main.mbt": ["not", "js"],
+    "lex_misc.mbt": ["not", "js"],
+    "lex_number.mbt": ["not", "js"],
+    "lex_string.mbt": ["not", "js"],
+    "internal_types.mbt": ["not", "js"],
+    "internal_types_wbtest.mbt": ["not", "js"],
+    "utils.mbt": ["not", "js"],
+    "lex_misc_test.mbt": ["not", "js"],
+    "lex_number_test.mbt": ["not", "js"],
+    "lex_string_test.mbt": ["not", "js"]
+  }
 }
