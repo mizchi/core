@@ -1,10 +1,12 @@
 # Double Internal Ryu Package Documentation
 
-This package provides the Ryu algorithm implementation for fast and accurate double-precision floating-point number to string conversion. Ryu is an optimized algorithm that produces the shortest decimal representation of floating-point numbers.
+This package provides fast and accurate double-precision floating-point number to string conversion. It currently uses the fp algorithm described at https://research.swtch.com/fp to produce the shortest decimal representation while keeping the same `@ryu.ryu_to_string` API.
 
 ## Overview
 
-The Ryu algorithm is used internally by the `double` package to convert floating-point numbers to their string representations efficiently and accurately. This is an internal implementation package that most users won't interact with directly.
+The fp algorithm is used internally by the `double` package to convert floating-point numbers to their string representations efficiently and accurately. This is an internal implementation package that most users won't interact with directly.
+
+> Note: This package historically used the Ryu algorithm, and some sections below still reference Ryu for background. The current implementation uses the fp algorithm while preserving the same output format.
 
 ## Core Function
 
@@ -31,13 +33,13 @@ test "ryu conversion" {
 
 ## Algorithm Properties
 
-The Ryu algorithm provides several important properties:
+The fp algorithm provides several important properties:
 
 ### Accuracy
 ```mbt check
 ///|
 test "accuracy properties" {
-  // Ryu produces the shortest decimal representation
+  // fp produces the shortest decimal representation
   let precise_value = 0.1
   let result = @ryu.ryu_to_string(precise_value)
   inspect(result.length() > 0, content="true")

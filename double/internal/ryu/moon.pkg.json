@@ -4,8 +4,16 @@
     "moonbitlang/core/bool",
     "moonbitlang/core/array"
   ],
+  "test-import": [
+    "moonbitlang/core/bench"
+  ],
+  "wbtest-import": [
+    "moonbitlang/core/bench"
+  ],
   "targets": {
     "ryu.mbt": ["not", "js"],
+    "fp.mbt": ["not", "js"],
+    "fp_pow10_table.mbt": ["not", "js"],
     "ryu_js.mbt": ["js"]
   },
   "warn-list": "-unused_package"
