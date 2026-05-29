@@ -150,6 +150,24 @@ fn ParseContext::lex_zero(
 }
 
 ///|
+/// Handles a number that cannot be represented exactly as a `Double` (an
+/// out-of-safe-range integer, or a literal that overflows the double range):
+/// preserve the original text in the side channel and return the signed
+/// infinity. Shared by both the integer and the floating-point paths of
+/// `lex_number_end`.
+fn ParseContext::lex_number_overflow(
+  ctx : ParseContext,
+  s : StringView,
+) -> Double {
+  ctx.last_number_repr = Some(s)
+  if s is ['-', ..] {
+    @double.neg_infinity
+  } else {
+    @double.infinity
+  }
+}
+
+///|
 fn ParseContext::lex_number_end(
   ctx : ParseContext,
   start : Int,
@@ -167,14 +185,7 @@ fn ParseContext::lex_number_end(
       }
       // Outside the safe-integer range we cannot represent the value exactly,
       // so fall back to infinity and preserve the original string.
-      _ => {
-        ctx.last_number_repr = Some(s)
-        if s is ['-', ..] {
-          @double.neg_infinity
-        } else {
-          @double.infinity
-        }
-      }
+      _ => ctx.lex_number_overflow(s)
     }
   } else {
     let parsed_double = try? @strconv.parse_double(s)
@@ -185,14 +196,7 @@ fn ParseContext::lex_number_end(
         d
       }
       // If parsing fails as a double, treat it as infinity and preserve the string
-      Err(_) => {
-        ctx.last_number_repr = Some(s)
-        if s is ['-', ..] {
-          @double.neg_infinity
-        } else {
-          @double.infinity
-        }
-      }
+      Err(_) => ctx.lex_number_overflow(s)
     }
   }
 }
