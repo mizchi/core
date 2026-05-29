@@ -18,6 +18,12 @@ priv struct ParseContext {
   input : StringView
   end_offset : Int
   mut remaining_available_depth : Int
+  // Side channel for the optional textual representation of the number that was
+  // most recently lexed. The number lexers return only the `Double` value and
+  // stash the (rarely needed) representation here to avoid allocating a tuple
+  // per number. Always read it through `finish_number_token`, which enforces
+  // the "read + clear exactly once" invariant.
+  mut last_number_repr : StringView?
 }
 
 ///|
@@ -30,7 +36,21 @@ fn ParseContext::make(
     input,
     end_offset: input.length(),
     remaining_available_depth: max_nesting_depth,
+    last_number_repr: None,
   }
+}
+
+///|
+/// Builds a `Number` token from the just-lexed `Double`, consuming the
+/// `last_number_repr` side channel set by the number lexers.
+///
+/// This is the single place that reads and clears `last_number_repr`, so the
+/// "read + clear exactly once" invariant lives in one location instead of being
+/// duplicated across every number branch in `lex_value`.
+fn ParseContext::finish_number_token(ctx : ParseContext, n : Double) -> Token {
+  let repr = ctx.last_number_repr
+  ctx.last_number_repr = None
+  Number(n, repr.map(_.to_string()))
 }
 
 ///|
